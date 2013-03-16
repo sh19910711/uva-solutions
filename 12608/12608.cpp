@@ -73,6 +73,10 @@ namespace solution {
                 sum += W[i];
                 if ( i - 1 >= 0 )
                     res -= X[i-1];
+                if ( i + 1 < N && sum == L ) {
+                    res += X[i] * 2;
+                    sum = 0;
+                }
             }
             res += X[N-1];
             return res;
