@@ -138,6 +138,9 @@ namespace solution {
         DW.resize(NW-1);
         for ( int i = 0; i + 1 < NW; ++ i ) {
             DW[i] = enc(LW[i+1], offset) - enc(LW[i], offset) + A_SIZE;
+            // cout << "W i+1: " << W[i+1] << ", LW: " << LW[i+1] << " => enc: " << enc(LW[i+1], offset) << endl;
+            // cout << "W i  : " << W[i] << ", LW: " << LW[i] << " => enc: " << enc(LW[i],offset) << endl;
+            // cout << "DW[i]: " << DW[i] << endl;
         }
     }
 
@@ -145,6 +148,9 @@ namespace solution {
         DS.resize(NS-1);
         for ( int i = 0; i + 1 < NS; ++ i ) {
             DS[i] = LS[i+1] - LS[i] + A_SIZE;
+            // cout << "S i+1: " << S[i+1] << ", LS: " << LS[i+1] << endl;
+            // cout << "S i  : " << S[i] << ", LS: " << LS[i] << endl;
+            // cout << "DS[i]: " << DS[i] << endl;
         }
     }
 
@@ -183,27 +189,61 @@ namespace solution {
         }
     }
 
-    int search() {
+    int search( char first_char ) {
         int cnt = 0;
         for ( int i = 0; i + NW - 2 < NS - 1; ++ i ) {
             // cout << hash_s[i+NW-1] << " - " << hash_s[i] << " == " << hash_w[NW-1];
             // cout << " * " << base[i] << "( = " << hash_w[NW-1] * base[i] << endl;
-            if ( hash_s_1[i+NW-1] - hash_s_1[i] == hash_w_1[NW-1] * base_1[i] ) {
-                if ( hash_s_2[i+NW-1] - hash_s_2[i] == hash_w_2[NW-1] * base_2[i] ) {
-                    cnt ++;
+            if ( S[i] == first_char ) {
+                if ( hash_s_1[i+NW-1] - hash_s_1[i] == hash_w_1[NW-1] * base_1[i] ) {
+                    if ( hash_s_2[i+NW-1] - hash_s_2[i] == hash_w_2[NW-1] * base_2[i] ) {
+                        // cout << S[i] << " : " << W[0] << endl;
+                        cnt ++;
+                    }
                 }
             }
         }
         // cout << "cnt = " << cnt << endl;
         return cnt;
     }
+
+    char get_first_char( char c, int offset ) {
+        int id = T[c];
+        return A[(id+offset)%NA];
+    }
     
     class Solution: public ISolution {
     public:
+        void init() {
+            R.clear();
+        }
         bool input() { 
             return cin >> A >> W >> S;
         }
+        void solve_one() {
+            CharMapArray<int> CNT;
+            for ( int i = 0; i < NA; ++ i )
+                CNT[A[i]] = 0;
+            for ( int i = 0; i < NS; ++ i ) {
+                CNT[S[i]] ++;
+            }
+            for ( int i = 0; i < NA; ++ i ) {
+                char c = get_first_char(W[0], i);
+                // cout << "offset " << i << ": " << c << ", ai = " << T[c] << endl;
+                if ( CNT[c] == 1 ) {
+                    // cout << "ok: " << c << endl; 
+                    R.push_back(i);
+                }
+            }
+        }
         void solve() {
+            // cout << A << ", " << W << ", " << S << endl;
+            if ( W.size() == 1 ) {
+                solve_one();
+                sort( R.begin(), R.end() );
+                return;
+            }
+
             parse_a();
             parse_w();
             parse_s();
@@ -214,17 +254,16 @@ namespace solution {
             // cout << "DS: " << DS << endl;
             
             calc_hash_s();
-            // cout << "hash s: " << vector<ULL>( hash_s+1, hash_s+NS ) << endl;
+            // cout << "hash s_1: " << vector<ULL>( hash_s_1+1, hash_s_1+NS ) << endl;
 
-            R.clear();
             for ( int i = 0; i < NA; ++ i ) {
                 calc_diff_w(i);
                 // cout << "DW: " << DW << endl;
             
                 calc_hash_w();
-                // cout << "hash w: " << vector<ULL>( hash_w+1, hash_w+NW ) << endl;
+                // cout << "hash w_1: " << vector<ULL>( hash_w_1+1, hash_w_1+NW ) << endl;
             
-                if ( search() == 1 )
+                if ( search(get_first_char(W[0], i)) == 1 )
                     R.push_back(i);
             }
             sort( R.begin(), R.end() );
@@ -237,6 +276,7 @@ namespace solution {
             } else {
                 cout << "ambiguous: " << R;
             }
+            cout << endl;
         }
         int run() {
             calc_base();
@@ -247,8 +287,6 @@ namespace solution {
                 init();
                 input();
                 solve();
-                if ( i > 0 )
-                    cout << endl;
                 output();
             }
             return 0;
