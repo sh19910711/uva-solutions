@@ -130,12 +130,15 @@ namespace solution {
         return ( c + offset ) % NA;
     }
 
-    void calc_diff( int offset ) {
+    void calc_diff_w( int offset ) {
         DW.resize(NW-1);
-        DS.resize(NS-1);
         for ( int i = 0; i + 1 < NW; ++ i ) {
             DW[i] = enc(LW[i+1], offset) - enc(LW[i], offset) + A_SIZE;
         }
+    }
+
+    void calc_diff_s() {
+        DS.resize(NS-1);
         for ( int i = 0; i + 1 < NS; ++ i ) {
             DS[i] = LS[i+1] - LS[i] + A_SIZE;
         }
@@ -185,12 +188,14 @@ namespace solution {
             parse_s();
             // cout << "LW: " << LW << endl;
             // cout << "LS: " << LS << endl;
+            
+            calc_diff_s();
+            // cout << "DS: " << DS << endl;
 
             R.clear();
             for ( int i = 0; i < NA; ++ i ) {
-                calc_diff(i);
+                calc_diff_w(i);
                 // cout << "DW: " << DW << endl;
-                // cout << "DS: " << DS << endl;
             
                 calc_hash();
                 // cout << "hash w: " << vector<ULL>( hash_w+1, hash_w+NW ) << endl;
