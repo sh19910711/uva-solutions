@@ -1,4 +1,4 @@
-6
+5
 ABC
 ABC
 ABCBBBABC
@@ -11,9 +11,6 @@ D7aaD77aDD7a
 ABC
 ABC
 ABC
-abcde
-ab
-abcdeab
-abcde
-e
-abcdea
+0123456789
+1
+123

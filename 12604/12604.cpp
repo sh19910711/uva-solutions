@@ -138,9 +138,6 @@ namespace solution {
         DW.resize(NW-1);
         for ( int i = 0; i + 1 < NW; ++ i ) {
             DW[i] = enc(LW[i+1], offset) - enc(LW[i], offset) + A_SIZE;
-            // cout << "W i+1: " << W[i+1] << ", LW: " << LW[i+1] << " => enc: " << enc(LW[i+1], offset) << endl;
-            // cout << "W i  : " << W[i] << ", LW: " << LW[i] << " => enc: " << enc(LW[i],offset) << endl;
-            // cout << "DW[i]: " << DW[i] << endl;
         }
     }
 
@@ -148,14 +145,10 @@ namespace solution {
         DS.resize(NS-1);
         for ( int i = 0; i + 1 < NS; ++ i ) {
             DS[i] = LS[i+1] - LS[i] + A_SIZE;
-            // cout << "S i+1: " << S[i+1] << ", LS: " << LS[i+1] << endl;
-            // cout << "S i  : " << S[i] << ", LS: " << LS[i] << endl;
-            // cout << "DS[i]: " << DS[i] << endl;
         }
     }
 
     void calc_base() {
-        // cout << "@calc_base" << endl;
         base_1[0] = 1;
         for ( int i = 0; i + 1 < S_SIZE; ++ i ) {
             base_1[i+1] = base_1[i] * HASH_BASE_1;
@@ -192,18 +185,14 @@ namespace solution {
     int search( char first_char ) {
         int cnt = 0;
         for ( int i = 0; i + NW - 2 < NS - 1; ++ i ) {
-            // cout << hash_s[i+NW-1] << " - " << hash_s[i] << " == " << hash_w[NW-1];
-            // cout << " * " << base[i] << "( = " << hash_w[NW-1] * base[i] << endl;
             if ( S[i] == first_char ) {
                 if ( hash_s_1[i+NW-1] - hash_s_1[i] == hash_w_1[NW-1] * base_1[i] ) {
                     if ( hash_s_2[i+NW-1] - hash_s_2[i] == hash_w_2[NW-1] * base_2[i] ) {
-                        // cout << S[i] << " : " << W[0] << endl;
                         cnt ++;
                     }
                 }
             }
         }
-        // cout << "cnt = " << cnt << endl;
         return cnt;
     }
 
@@ -229,40 +218,28 @@ namespace solution {
             }
             for ( int i = 0; i < NA; ++ i ) {
                 char c = get_first_char(W[0], i);
-                // cout << "offset " << i << ": " << c << ", ai = " << T[c] << endl;
                 if ( CNT[c] == 1 ) {
-                    // cout << "ok: " << c << endl; 
                     R.push_back(i);
                 }
             }
         }
         void solve() {
-            // cout << A << ", " << W << ", " << S << endl;
+            parse_a();
+            parse_w();
+            parse_s();
+
             if ( W.size() == 1 ) {
                 solve_one();
                 sort( R.begin(), R.end() );
                 return;
             }
-
-            parse_a();
-            parse_w();
-            parse_s();
-            // cout << "LW: " << LW << endl;
-            // cout << "LS: " << LS << endl;
             
             calc_diff_s();
-            // cout << "DS: " << DS << endl;
-            
             calc_hash_s();
-            // cout << "hash s_1: " << vector<ULL>( hash_s_1+1, hash_s_1+NS ) << endl;
 
             for ( int i = 0; i < NA; ++ i ) {
                 calc_diff_w(i);
-                // cout << "DW: " << DW << endl;
-            
                 calc_hash_w();
-                // cout << "hash w_1: " << vector<ULL>( hash_w_1+1, hash_w_1+NW ) << endl;
-            
                 if ( search(get_first_char(W[0], i)) == 1 )
                     R.push_back(i);
             }
