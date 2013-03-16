@@ -85,19 +85,23 @@ namespace solution {
         }
     };
     
-    const int A_SIZE = 63;
+    const int A_SIZE = 70;
     const int W_SIZE = 50011;
     const int S_SIZE = 500011;
-    const int HASH_BASE = 131;
+    const int HASH_BASE_1 = 131;
+    const int HASH_BASE_2 = 149;
 
     string A, W, S;
     CharMapArray<int> T;
     int NA, NW, NS;
     VI LW, LS;
     VI DW, DS;
-    ULL base[S_SIZE];
-    ULL hash_w[W_SIZE];
-    ULL hash_s[S_SIZE];
+    ULL base_1[S_SIZE];
+    ULL hash_w_1[W_SIZE];
+    ULL hash_s_1[S_SIZE];
+    ULL base_2[S_SIZE];
+    ULL hash_w_2[W_SIZE];
+    ULL hash_s_2[S_SIZE];
     VI R;
     
     void parse_a() {
@@ -146,20 +150,36 @@ namespace solution {
 
     void calc_base() {
         // cout << "@calc_base" << endl;
-        base[0] = 1;
+        base_1[0] = 1;
         for ( int i = 0; i + 1 < S_SIZE; ++ i ) {
-            base[i+1] = base[i] * HASH_BASE;
+            base_1[i+1] = base_1[i] * HASH_BASE_1;
+        }
+        base_2[0] = 1;
+        for ( int i = 0; i + 1 < S_SIZE; ++ i ) {
+            base_2[i+1] = base_2[i] * HASH_BASE_2;
         }
     }
 
-    void calc_hash() {
-        hash_w[0] = 0;
+    void calc_hash_w() {
+        hash_w_1[0] = 0;
         for ( int i = 0; i < NW - 1; ++ i ) {
-            hash_w[i+1] = hash_w[i] + ( ( DW[i] + 1 ) * base[i] );
+            hash_w_1[i+1] = hash_w_1[i] + ( ( DW[i] + 1 ) * base_1[i] );
         }
-        hash_s[0] = 0;
+        hash_w_2[0] = 0;
+        for ( int i = 0; i < NW - 1; ++ i ) {
+            hash_w_2[i+1] = hash_w_2[i] + ( ( DW[i] + 1 ) * base_2[i] );
+        }
+
+    }
+
+    void calc_hash_s() {
+        hash_s_1[0] = 0;
         for ( int i = 0; i < NS - 1; ++ i ) {
-            hash_s[i+1] = hash_s[i] + ( ( DS[i] + 1 ) * base[i] );
+            hash_s_1[i+1] = hash_s_1[i] + ( ( DS[i] + 1 ) * base_1[i] );
+        }
+        hash_s_2[0] = 0;
+        for ( int i = 0; i < NS - 1; ++ i ) {
+            hash_s_2[i+1] = hash_s_2[i] + ( ( DS[i] + 1 ) * base_2[i] );
         }
     }
 
@@ -168,9 +188,10 @@ namespace solution {
         for ( int i = 0; i + NW - 2 < NS - 1; ++ i ) {
             // cout << hash_s[i+NW-1] << " - " << hash_s[i] << " == " << hash_w[NW-1];
             // cout << " * " << base[i] << "( = " << hash_w[NW-1] * base[i] << endl;
-            if ( hash_s[i+NW-1] - hash_s[i] == hash_w[NW-1] * base[i] ) {
-                // cout << "i = " << i << endl;
-                cnt ++;
+            if ( hash_s_1[i+NW-1] - hash_s_1[i] == hash_w_1[NW-1] * base_1[i] ) {
+                if ( hash_s_2[i+NW-1] - hash_s_2[i] == hash_w_2[NW-1] * base_2[i] ) {
+                    cnt ++;
+                }
             }
         }
         // cout << "cnt = " << cnt << endl;
@@ -191,28 +212,30 @@ namespace solution {
             
             calc_diff_s();
             // cout << "DS: " << DS << endl;
+            
+            calc_hash_s();
+            // cout << "hash s: " << vector<ULL>( hash_s+1, hash_s+NS ) << endl;
 
             R.clear();
             for ( int i = 0; i < NA; ++ i ) {
                 calc_diff_w(i);
                 // cout << "DW: " << DW << endl;
             
-                calc_hash();
+                calc_hash_w();
                 // cout << "hash w: " << vector<ULL>( hash_w+1, hash_w+NW ) << endl;
-                // cout << "hash s: " << vector<ULL>( hash_s+1, hash_s+NS ) << endl;
             
                 if ( search() == 1 )
                     R.push_back(i);
             }
-
+            sort( R.begin(), R.end() );
         }
         void output() {
             if ( R.empty() ) {
-                cout << "no solution" << endl;
+                cout << "no solution";
             } else if ( R.size() == 1 ) {
-                cout << "unique: " << R << endl;
+                cout << "unique: " << R;
             } else {
-                cout << "ambiguous: " << R << endl;
+                cout << "ambiguous: " << R;
             }
         }
         int run() {
@@ -224,6 +247,8 @@ namespace solution {
                 init();
                 input();
                 solve();
+                if ( i > 0 )
+                    cout << endl;
                 output();
             }
             return 0;
