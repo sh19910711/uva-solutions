@@ -1,0 +1,35 @@
+1 2
+NOT
+true false
+AND
+false false
+false true
+TWEEK
+true false
+true false
+(x AND (NOT(y TWEEK z)))
+x true
+y true
+*
+1 1
+MOCK
+true true
+NAND
+true true
+true false
+(x NAND (MOCK (y NAND z)))
+x false
+y false
+*
+0 2
+XOR
+false true
+true false
+FAKE
+true true
+false false
+((p XOR q) FAKE r)
+p true
+q false
+*
+-1 -1
