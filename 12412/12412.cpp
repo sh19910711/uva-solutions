@@ -50,7 +50,8 @@ namespace solution {
     typedef set<string> SID_SET;
 
     const int SUBJECTS = 4;
-    const int MAX_STUDENTS = 111;
+    const int MAX_STUDENTS = 10011;
+    const double EPS = 0.00001;
     enum ADD_STUDENT_RESULT {
         SUCCESS, DUPLICATED
     };
@@ -74,26 +75,21 @@ namespace solution {
     }
 
     string to_string( double x ) {
-        OSS oss;
-        oss << setiosflags(ios::fixed) << setprecision(20) << abs(x);
-        string s = oss.str();
-        int n = s.size();
-        for ( int i = 0; i < n; ++ i )
-            if ( s[i] == '.' )
-                return s.substr(0, i + 3);
-        return "";
+        char buf[256];
+        sprintf(buf, "%.2lf", x);
+        return string(buf);
     }
 
     class StudentInfo {
     public:
         string sid;
-        string cid;
+        int cid;
         string name;
         int scores[SUBJECTS];
 
         StudentInfo(){}
 
-        StudentInfo( string sid, string cid, string name, int scores[SUBJECTS] ) {
+        StudentInfo( string sid, int cid, string name, int scores[SUBJECTS] ) {
             this->sid = sid;
             this->cid = cid;
             this->name = name;
@@ -106,7 +102,7 @@ namespace solution {
         }
 
         double getAverage() const {
-            return (double)getSum() / SUBJECTS;
+            return (double)getSum() / (double)SUBJECTS + EPS;
         }
 
         friend ostream& operator <<( ostream& os, const StudentInfo& si ) {
@@ -136,7 +132,7 @@ namespace solution {
             II list[MAX_STUDENTS];
             for ( int i = 0; i < si_cnt; ++ i )
                 list[i] = II(si_list[i].getSum(), i);
-            sort(list, list+si_cnt, greater<II>());
+            sort(list, list + si_cnt, greater<II>());
             for ( int i = 0; i < si_cnt; ++ i ) {
                 if ( i > 0 && list[i].first == list[i - 1].first )
                     ranks[list[i].second] = ranks[list[i - 1].second];
@@ -145,7 +141,7 @@ namespace solution {
             }
         }
 
-        ADD_STUDENT_RESULT addStudent( string sid, string cid, string name, int scores[SUBJECTS] ) {
+        ADD_STUDENT_RESULT addStudent( string sid, int cid, string name, int scores[SUBJECTS] ) {
             if ( sid_set.count(sid) )
                 return DUPLICATED;
             sid_set.insert(sid);
@@ -155,9 +151,10 @@ namespace solution {
         }
 
         bool addStudents() {
-            cout << "Please enter the SID, CID, name and four scores. Enter 0 to finish." << endl;
+            cout << "Please enter the SID, CID, name and four scores. Enter 0 to finish." << "\n";
 
-            string sid, cid, name;
+            string sid, name;
+            int cid;
             int scores[SUBJECTS];
             cin >> sid;
             if ( sid == "0" )
@@ -168,19 +165,19 @@ namespace solution {
             }
 
             if ( addStudent(sid, cid, name, scores) == DUPLICATED )
-                cout << "Duplicated SID." << endl;
+                cout << "Duplicated SID." << "\n";
             return true;
         }
 
         void deleteStudent( int k ) {
             for ( int i = k; i + 1 < si_cnt; ++ i )
                 si_list[i] = si_list[i+1];
-            si_cnt --;
+            si_cnt -= 1;
             calcRanks();
         }
 
         bool deleteStudents() {
-            cout << "Please enter SID or name. Enter 0 to finish." << endl;
+            cout << "Please enter SID or name. Enter 0 to finish." << "\n";
             string query;
             cin >> query;
             if ( query == "0" )
@@ -210,18 +207,18 @@ namespace solution {
                     deleted ++;
                 }
             }
-            cout << deleted << " student(s) removed." << endl;
+            cout << deleted << " student(s) removed." << "\n";
 
             return true;
         }
 
         void queryStudent( int k ) {
             StudentInfo& s = si_list[k];
-            cout << ranks[k] << " " << s << endl;
+            cout << ranks[k] << " " << s << "\n";
         }
 
         bool queryStudents() {
-            cout << "Please enter SID or name. Enter 0 to finish." << endl;
+            cout << "Please enter SID or name. Enter 0 to finish." << "\n";
             string query;
             cin >> query;
             if ( query == "0" )
@@ -237,7 +234,7 @@ namespace solution {
         }
 
         void calcWholeClassStatistics() {
-            LL sum[SUBJECTS];
+            int sum[SUBJECTS];
             double avg[SUBJECTS];
             int students;
             int passed[SUBJECTS];
@@ -260,17 +257,17 @@ namespace solution {
             }
             for ( int i = 0; i < SUBJECTS; ++ i ) {
                 if ( students == 0 )
-                    avg[i] = 0;
+                    avg[i] = EPS;
                 else 
-                    avg[i] = (double)sum[i] / students;
+                    avg[i] = (double)sum[i] / (double)students + EPS;
             }
 
             for ( int i = 0; i < SUBJECTS; ++ i ) {
-                cout << SUBJECT_LABELS[i] << endl;
-                cout << "Average Score: " << to_string(avg[i]) << endl;
-                cout << "Number of passed students: " << passed[i] << endl;
-                cout << "Number of failed students: " << failed[i] << endl;
-                cout << endl;
+                cout << SUBJECT_LABELS[i] << "\n";
+                cout << "Average Score: " << to_string(avg[i]) << "\n";
+                cout << "Number of passed students: " << passed[i] << "\n";
+                cout << "Number of failed students: " << failed[i] << "\n";
+                cout << "\n";
             }
 
             const int OVERALL_TYPES = 5;
@@ -288,17 +285,17 @@ namespace solution {
                 for ( int j = 1; j <= passed_subjects; ++ j )
                     num[j] ++;
             }
-            cout << "Overall:" << endl;
-            cout << "Number of students who passed all subjects: " << num[4] << endl;
-            cout << "Number of students who passed 3 or more subjects: " << num[3] << endl;
-            cout << "Number of students who passed 2 or more subjects: " << num[2] << endl;
-            cout << "Number of students who passed 1 or more subjects: " << num[1] << endl;
-            cout << "Number of students who failed all subjects: " << num[0] << endl;
-            cout << endl;
+            cout << "Overall:" << "\n";
+            cout << "Number of students who passed all subjects: " << num[4] << "\n";
+            cout << "Number of students who passed 3 or more subjects: " << num[3] << "\n";
+            cout << "Number of students who passed 2 or more subjects: " << num[2] << "\n";
+            cout << "Number of students who passed 1 or more subjects: " << num[1] << "\n";
+            cout << "Number of students who failed all subjects: " << num[0] << "\n";
+            cout << "\n";
         }
 
-        void calcClassStatistics( string cid ) {
-            LL sum[SUBJECTS];
+        void calcClassStatistics( int cid ) {
+            int sum[SUBJECTS];
             double avg[SUBJECTS];
             int students;
             int passed[SUBJECTS];
@@ -323,17 +320,17 @@ namespace solution {
             }
             for ( int i = 0; i < SUBJECTS; ++ i ) {
                 if ( students == 0 )
-                    avg[i] = 0;
+                    avg[i] = EPS;
                 else 
-                    avg[i] = (double)sum[i] / students;
+                    avg[i] = (double)sum[i] / (double)students + EPS;
             }
 
             for ( int i = 0; i < SUBJECTS; ++ i ) {
-                cout << SUBJECT_LABELS[i] << endl;
-                cout << "Average Score: " << to_string(avg[i]) << endl;
-                cout << "Number of passed students: " << passed[i] << endl;
-                cout << "Number of failed students: " << failed[i] << endl;
-                cout << endl;
+                cout << SUBJECT_LABELS[i] << "\n";
+                cout << "Average Score: " << to_string(avg[i]) << "\n";
+                cout << "Number of passed students: " << passed[i] << "\n";
+                cout << "Number of failed students: " << failed[i] << "\n";
+                cout << "\n";
             }
 
             const int OVERALL_TYPES = 5;
@@ -353,22 +350,22 @@ namespace solution {
                         num[j] ++;
                 }
             }
-            cout << "Overall:" << endl;
-            cout << "Number of students who passed all subjects: " << num[4] << endl;
-            cout << "Number of students who passed 3 or more subjects: " << num[3] << endl;
-            cout << "Number of students who passed 2 or more subjects: " << num[2] << endl;
-            cout << "Number of students who passed 1 or more subjects: " << num[1] << endl;
-            cout << "Number of students who failed all subjects: " << num[0] << endl;
-            cout << endl;
+            cout << "Overall:" << "\n";
+            cout << "Number of students who passed all subjects: " << num[4] << "\n";
+            cout << "Number of students who passed 3 or more subjects: " << num[3] << "\n";
+            cout << "Number of students who passed 2 or more subjects: " << num[2] << "\n";
+            cout << "Number of students who passed 1 or more subjects: " << num[1] << "\n";
+            cout << "Number of students who failed all subjects: " << num[0] << "\n";
+            cout << "\n";
         }
 
         void showStatistics() {
-            cout << "Please enter class ID, 0 for the whole statistics." << endl;
+            cout << "Please enter class ID, 0 for the whole statistics." << "\n";
 
-            string query;
+            int query;
             cin >> query;
 
-            if ( query == "0" ) {
+            if ( query == 0 ) {
                 calcWholeClassStatistics();
             } else {
                 calcClassStatistics(query);
@@ -376,15 +373,15 @@ namespace solution {
         }
 
         bool showMenu() {
-            cout << "Welcome to Student Performance Management System (SPMS)." << endl;
-            cout << endl;
-            cout << "1 - Add" << endl;
-            cout << "2 - Remove" << endl;
-            cout << "3 - Query" << endl;
-            cout << "4 - Show ranking" << endl;
-            cout << "5 - Show Statistics" << endl;
-            cout << "0 - Exit" << endl;
-            cout << endl;
+            cout << "Welcome to Student Performance Management System (SPMS)." << "\n";
+            cout << "\n";
+            cout << "1 - Add" << "\n";
+            cout << "2 - Remove" << "\n";
+            cout << "3 - Query" << "\n";
+            cout << "4 - Show ranking" << "\n";
+            cout << "5 - Show Statistics" << "\n";
+            cout << "0 - Exit" << "\n";
+            cout << "\n";
             int n;
             cin >> n;
             switch ( n ) {
@@ -398,7 +395,7 @@ namespace solution {
                     while ( queryStudents() );
                     break;
                 case 4:
-                    cout << "Showing the ranklist hurts students' self-esteem. Don't do that." << endl;
+                    cout << "Showing the ranklist hurts students' self-esteem. Don't do that." << "\n";
                     break;
                 case 5:
                     showStatistics();
@@ -420,10 +417,7 @@ namespace solution {
         }
         
         int run() {
-            init();
-            input();
             solve();
-            output();
             return 0;
         }
         
