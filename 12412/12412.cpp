@@ -63,14 +63,13 @@ namespace solution {
 
     string getline() {
         string res;
-        getline(cin, res);
+        cin >> res;
         return res;
     }
 
     int get_number() {
-        ISS iss(getline());
         int res;
-        iss >> res;
+        cin >> res;
         return res;
     }
 
@@ -157,16 +156,15 @@ namespace solution {
 
         bool addStudents() {
             cout << "Please enter the SID, CID, name and four scores. Enter 0 to finish." << endl;
-            string s = getline();
-            if ( s == "0" )
-                return false;
 
-            ISS iss(s);
             string sid, cid, name;
             int scores[SUBJECTS];
-            iss >> sid >> cid >> name;
+            cin >> sid;
+            if ( sid == "0" )
+                return false;
+            cin >> cid >> name;
             for ( int i = 0; i < 4; ++ i ) {
-                iss >> scores[i];
+                cin >> scores[i];
             }
 
             if ( addStudent(sid, cid, name, scores) == DUPLICATED )
@@ -183,14 +181,11 @@ namespace solution {
 
         bool deleteStudents() {
             cout << "Please enter SID or name. Enter 0 to finish." << endl;
-            string s = getline();
-            if ( s == "0" )
+            string query;
+            cin >> query;
+            if ( query == "0" )
                 return false;
 
-            ISS iss(s);
-            string query;
-            iss >> query;
-            
             int deleted = 0;
             bool targets[MAX_STUDENTS];
             fill(targets, targets + MAX_STUDENTS, false);
@@ -227,13 +222,10 @@ namespace solution {
 
         bool queryStudents() {
             cout << "Please enter SID or name. Enter 0 to finish." << endl;
-            string s = getline();
-            if ( s == "0" )
-                return false;
-
-            ISS iss(s);
             string query;
-            iss >> query;
+            cin >> query;
+            if ( query == "0" )
+                return false;
 
             for ( int i = 0; i < si_cnt; ++ i ) {
                 if ( si_list[i].sid == query || si_list[i].name == query ) {
@@ -372,18 +364,15 @@ namespace solution {
 
         void showStatistics() {
             cout << "Please enter class ID, 0 for the whole statistics." << endl;
-            string s = getline();
-            if ( s == "0" ) {
-                calcWholeClassStatistics();
-                return;
-            }
 
-            ISS iss(s);
             string query;
-            iss >> query;
+            cin >> query;
 
-            calcClassStatistics(query);
-            return;
+            if ( query == "0" ) {
+                calcWholeClassStatistics();
+            } else {
+                calcClassStatistics(query);
+            }
         }
 
         bool showMenu() {
@@ -396,7 +385,8 @@ namespace solution {
             cout << "5 - Show Statistics" << endl;
             cout << "0 - Exit" << endl;
             cout << endl;
-            int n = get_number();
+            int n;
+            cin >> n;
             switch ( n ) {
                 case 1:
                     while ( addStudents() );
