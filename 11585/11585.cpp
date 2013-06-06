@@ -64,6 +64,8 @@ namespace solution {
 
     const int dr[4] = {0, 0, 1, -1};
     const int dc[4] = {1, -1, 0, 0};
+    const int dr2[8] = {0, 0, 1, -1, 1, 1, -1, -1};
+    const int dc2[8] = {1, -1, 0, 0, 1, -1, 1, -1};
 
     int get_number() {
         string s;
@@ -103,14 +105,148 @@ namespace solution {
         return res;
     }
 
-    bool solve() {
+    bool check_filled() {
         fill_init();
         for ( int i = 0; i < D; ++ i ) {
             int ret = fill(R[i], C[i]);
-            cout << R[i] << ", " << C[i] << ": " << ret << " ? " << N[i] << endl;
             if ( ret != N[i] )
                 return false;
         }
+        return true;
+    }
+
+    void calc_shaded_init() {
+        for ( int i = 0; i < H; ++ i )
+            for ( int j = 0; j < W; ++ j )
+                V[i][j] = false;
+    }
+
+    int calc_shaded( int r, int c ) {
+        if ( V[r][c] )
+            return 0;
+        V[r][c] = true;
+        int res = 1;
+        for ( int k = 0; k < 4; ++ k ) {
+            int nr = r + dr[k];
+            int nc = c + dc[k];
+            if ( ! check_pos(nr, nc) )
+                continue;
+            if ( M[nr][nc] == EMPTY )
+                continue;
+            if ( V[nr][nc] )
+                continue;
+            res += calc_shaded(nr, nc);
+        }
+        return res;
+    }
+
+    bool check_shaded() {
+        int shaded = 0;
+        for ( int i = 0; i < H; ++ i )
+            for ( int j = 0; j < W; ++ j )
+                if ( M[i][j] != EMPTY )
+                    shaded ++;
+        calc_shaded_init();
+        for ( int i = 0; i < H; ++ i )
+            for ( int j = 0; j < W; ++ j )
+                if ( M[i][j] != EMPTY ) {
+                    int ret = calc_shaded(i, j);
+                    return ret == shaded;
+                }
+        return shaded == 0;
+    }
+
+    bool check_2x2( int r, int c ) {
+        for ( int i = 0; i < 2; ++ i )
+            for ( int j = 0; j < 2; ++ j )
+                if ( M[r + i][c + j] == EMPTY )
+                    return true;
+        return false;
+    }
+
+    bool check_2x2() {
+        for ( int i = 0; i + 1 < H; ++ i )
+            for ( int j = 0; j + 1 < W; ++ j )
+                if ( ! check_2x2(i, j) )
+                    return false;
+        return true;
+    }
+
+    void dfs_init() {
+        for ( int i = 0; i < H; ++ i )
+            for ( int j = 0; j < W; ++ j )
+                V[i][j] = false;
+    }
+
+    bool dfs( int r, int c ) {
+        if ( V[r][c] )
+            return false;
+        V[r][c] = true;
+        if ( r == 0 || r == H - 1 || c == 0 || c == W - 1 )
+            return true;
+        for ( int k = 0; k < 8; ++ k ) {
+            int nr = r + dr2[k];
+            int nc = c + dc2[k];
+            if ( ! check_pos(nr, nc) )
+                continue;
+            if ( V[nr][nc] )
+                continue;
+            if ( M[nr][nc] != EMPTY )
+                continue;
+            if ( dfs(nr, nc) )
+                return true;
+        }
+        return false;
+    }
+
+    bool check_reached() {
+        for ( int i = 0; i < D; ++ i ) {
+            dfs_init();
+            if ( ! V[R[i]][C[i]] && ! dfs(R[i], C[i]) )
+                return false;
+        }
+        return true;
+    }
+
+    bool check_sum() {
+        int empties = 0;
+        for ( int i = 0; i < H; ++ i )
+            for ( int j = 0; j < W; ++ j )
+                if ( M[i][j] == EMPTY )
+                    empties ++;
+        int sum = 0;
+        for ( int i = 0; i < D; ++ i )
+            sum += N[i];
+        return empties == sum;
+    }
+
+    bool check_2x2_small() {
+        for ( int i = 0; i < min(2, H); ++ i )
+            for ( int j = 0; j < min(2, W); ++ j )
+                if ( M[i][j] == EMPTY )
+                    return true;
+        return false;
+    }
+
+    bool has_zero() {
+        return count(N, N + D, 0) > 0;
+    }
+
+    bool solve() {
+        if ( has_zero() )
+            return false;
+        if ( ! check_sum() )
+            return false;
+        if ( ! check_filled() )
+            return false;
+        if ( ! check_shaded() )
+            return false;
+        if ( ! check_2x2() )
+            return false;
+        if ( ! check_2x2_small() )
+            return false;
+        if ( ! check_reached() )
+            return false;
         return true;
     }
 
