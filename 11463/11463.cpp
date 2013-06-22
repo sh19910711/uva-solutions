@@ -75,7 +75,7 @@ namespace solution {
 namespace solution {
   // constant vars
   const int SIZE = 100 + 11;
-  const int NONE = SIZE * SIZE;
+  const int NONE = SIZE * SIZE + SIZE * SIZE + 11;
 
   // storages
   int N;
