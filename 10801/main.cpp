@@ -53,6 +53,77 @@ namespace solution {
   };
 }
 
+// @snippet<sh19910711/contest:search/dijkstra_interface.cpp>
+namespace search {
+  template <class StateType, class CostType> class DijkstraInterface {
+  public:
+    typedef CostType Cost;
+    typedef StateType State;
+    typedef std::pair <Cost, State> Node;
+    virtual Cost search()                    = 0;
+  protected:
+    virtual Cost get_none_cost()             = 0;
+    virtual void init()                      = 0;
+    virtual void push( Node node )           = 0;
+    virtual bool is_goal( Node node )        = 0;
+    virtual void find_next_node( Node node ) = 0;
+    virtual bool is_min_cost( Node node )    = 0;
+  };
+}
+
+// @snippet<sh19910711/contest:search/dijkstra_base.cpp>
+namespace search {
+  template <class StateType, class CostType> class DijkstraBase: public DijkstraInterface<StateType, CostType> {
+  public:
+    typedef CostType Cost;
+    typedef StateType State;
+    typedef std::pair <Cost, State> Node;
+    typedef std::priority_queue<Node, std::vector<Node>, std::greater<Node> > Queue;
+    typedef std::map <State, Cost> MinCost;
+    
+    virtual Cost search() {
+      Q = Queue();
+      MC.clear();
+      init();
+      
+      while ( ! Q.empty() ) {
+        Node node = Q.top();
+        Q.pop();
+        
+        if ( is_goal(node) )
+          return node.first;
+        
+        find_next_node(node);
+      }
+      
+      return get_none_cost();
+    }
+  protected:
+    virtual Cost get_none_cost()             = 0;
+    virtual void init()                      = 0;
+    virtual bool is_goal( Node node )        = 0;
+    virtual void find_next_node( Node node ) = 0;
+    
+    virtual void push( Node node ) {
+      if ( ! is_min_cost(node) )
+        return;
+      MC[node.second] = node.first;
+      Q.push(node);
+    }
+    
+    virtual bool is_min_cost( Node node ) {
+      if ( ! MC.count(node.second) )
+        return true;
+      return node.first < MC[node.second];
+    }
+    
+  private:
+    Queue Q;
+    MinCost MC;
+    
+  };
+}
+
 // @snippet<sh19910711/contest:solution/typedef.cpp>
 namespace solution {
   typedef std::istringstream ISS;
@@ -70,10 +141,6 @@ namespace solution {
 namespace solution {
   // namespaces, types
   using namespace std;
-  typedef std::pair <int, int> State; // (floor, elevator)
-  typedef std::pair <LL, State> Node; // (steps, state))
-  typedef std::priority_queue<Node, std::vector<Node>, std::greater<Node> > Queue;
-  typedef std::map <State, LL> MinCost;
 }
 
 // @snippet<sh19910711/contest:solution/variables-area.cpp>
@@ -88,15 +155,62 @@ namespace solution {
   int T[ELEVATORS];
   int E[ELEVATORS][FLOORS];
   int EC[ELEVATORS];
-
+  
   int floor_elevators[FLOORS][ELEVATORS];
   int floor_elevators_num[FLOORS];
   bool floor_elevators_set[FLOORS][ELEVATORS];
-
-  Queue Q;
-  MinCost MC;
-
+  
   LL result;
+}
+
+namespace solution {
+  typedef std::pair <int, int> State; // (floor, elevator)
+
+  class Dijkstra: public search::DijkstraBase<State, LL> {
+  protected:
+    Cost get_none_cost() {
+      return INF;
+    }
+    
+    void init() {
+      for ( int i = 0; i < n; ++ i ) {
+        if ( E[i][0] == 0 ) {
+          push(std::make_pair(0, State(0, i)));
+        }
+      }
+    }
+    
+    bool is_goal( Node node ) {
+      LL steps = node.first;
+      int floor_id = node.second.first;
+      int elevator_id = node.second.second;
+      return floor_elevators_set[floor_id][elevator_id] && floor_id == K;
+    }
+    
+    void find_next_node( Node node ) {
+      LL steps = node.first;
+      int floor_id = node.second.first;
+      int elevator_id = node.second.second;
+      
+      if ( floor_elevators_set[floor_id][elevator_id] ) {
+        for ( int i = 0; i < floor_elevators_num[floor_id]; ++ i ) {
+          int next_elevator_id = floor_elevators[floor_id][i];
+          LL next_steps = steps + 60;
+          int next_floor_id = floor_id;
+          push(Node(next_steps, State(next_floor_id, next_elevator_id)));
+        }
+      }
+      
+      for ( int i = -1; i <= 1; ++ i ) {
+        int next_floor_id = floor_id + i;
+        if ( next_floor_id < 0 || next_floor_id >= 100 )
+          continue;
+        LL next_steps = steps + T[elevator_id];
+        int next_elevator_id = elevator_id;
+        push(Node(next_steps, State(next_floor_id, next_elevator_id)));
+      }
+    }
+  };
 }
 
 // @snippet<sh19910711/contest:solution/solver-area.cpp>
@@ -105,9 +219,9 @@ namespace solution {
   public:
     void solve() {
       find_floor_elevators();
-      result = find_minimum_steps();
+      result = dijkstra.search();
     }
-
+    
     void find_floor_elevators() {
       for ( int i = 0; i < n; ++ i ) {
         int floors_num = EC[i];
@@ -118,81 +232,8 @@ namespace solution {
         }
       }
     }
-
-    bool check_min_cost( State state, LL new_steps ) {
-      if ( ! MC.count(state) )
-        return true;
-      return new_steps < MC[state];
-    }
-
-    void update_min_cost( State state, LL steps ) {
-      MC[state] = steps;
-    }
-
-    void print_node( Node node ) {
-      printf("steps = %5lld, floor = %5d, elevator = %5d\n", node.first, node.second.first, node.second.second);
-    }
-
-    LL find_minimum_steps() {
-      Q = Queue();
-      MC.clear();
-
-      for ( int i = 0; i < n; ++ i ) {
-        if ( E[i][0] == 0 ) {
-          Q.push(Node(0, State(0, i)));
-          MC[State(0, i)] = 0;
-        }
-      }
-
-      while ( ! Q.empty() ) {
-        Node node = Q.top();
-        Q.pop();
-
-        LL steps = node.first;
-        int floor_id = node.second.first;
-        int elevator_id = node.second.second;
-
-        if ( floor_elevators_set[floor_id][elevator_id] && floor_id == K )
-          return steps;
-
-        if ( floor_elevators_set[floor_id][elevator_id] ) {
-          for ( int i = 0; i < floor_elevators_num[floor_id]; ++ i ) {
-            int elevator_id = floor_elevators[floor_id][i];
-            LL next_steps = steps + 60;
-            int next_floor_id = floor_id;
-            int next_elevator_id = elevator_id;
-
-            State next_state(next_floor_id, next_elevator_id);
-            if ( ! check_min_cost(next_state, next_steps) )
-              continue;
-            update_min_cost(next_state, next_steps);
-
-            Node next_node(next_steps, next_state);
-
-            Q.push(next_node);
-          }
-        }
-
-        for ( int i = -1; i <= 1; ++ i ) {
-          int next_floor_id = floor_id + i;
-          if ( next_floor_id < 0 || next_floor_id >= 100 )
-            continue;
-          LL next_steps = steps + T[elevator_id];
-          int next_elevator_id = elevator_id;
-
-          State next_state(next_floor_id, next_elevator_id);
-          if ( ! check_min_cost(next_state, next_steps) )
-            continue;
-          update_min_cost(next_state, next_steps);
-
-          Node next_node(next_steps, next_state);
-
-          Q.push(next_node);
-        }
-      }
-
-      return INF;
-    }
+    
+    Dijkstra dijkstra;
     
   private:
     
@@ -280,5 +321,6 @@ int main() {
   return solution::Solution().run();
 }
 #endif
+
 
 
