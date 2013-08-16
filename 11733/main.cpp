@@ -163,6 +163,39 @@ namespace setlib {
   };
 }
 
+// @snippet<sh19910711/contest:graph/get_minimum_spanning_forest.cpp>
+namespace graph {
+  template <typename GraphType> const typename std::vector<typename GraphType::Edge> get_minimum_spanning_forest( const GraphType& G ) {
+    typedef typename std::vector<typename GraphType::Edge> Edges;
+    typedef typename GraphType::Edge GraphEdge;
+    typedef typename GraphType::Edges GraphEdges;
+    typedef std::priority_queue<GraphEdge, Edges, std::greater<GraphEdge> > PriorityQueue;
+    typedef setlib::DisjointSets UnionFind;
+    
+    Edges res;
+    PriorityQueue E;
+    UnionFind uf(G.num_vertices);
+    
+    for ( int i = 0; i < G.num_vertices; ++ i ) {
+      for ( typename GraphEdges::const_iterator it_i = G.vertex_edges[i].begin(); it_i != G.vertex_edges[i].end(); ++ it_i ) {
+        const GraphEdge& e = **it_i;
+        E.push(GraphEdge(e.from, e.to, e.weight));
+      }
+    }
+    
+    while ( ! E.empty() ) {
+      GraphEdge e = E.top();
+      E.pop();
+      if ( ! uf.same(e.from, e.to) ) {
+        res.push_back(e);
+        uf.merge(e.from, e.to);
+      }
+    }
+    
+    return res;
+  }
+}
+
 // @snippet<sh19910711/contest:storage/vector.cpp>
 namespace storage {
   template <typename ValueType, int SIZE> class VectorClass {
@@ -294,32 +327,6 @@ namespace solution {
       return Result(cost + airports * A, airports);
     }
     
-    const Edges get_minimum_spanning_forest( const Graph& G ) {
-      typedef std::priority_queue<Edge, Edges, std::greater<Edge> > PriorityQueue;
-      PriorityQueue E;
-      
-      for ( int i = 0; i < G.num_vertices; ++ i ) {
-        for ( Graph::Edges::const_iterator it_i = G.vertex_edges[i].begin(); it_i != G.vertex_edges[i].end(); ++ it_i ) {
-          const Edge& e = **it_i;
-          E.push(Edge(e.from, e.to, e.weight));
-        }
-      }
-      
-      Edges res;
-      UnionFind uf(G.num_vertices);
-      
-      while ( ! E.empty() ) {
-        Edge e = E.top();
-        E.pop();
-        if ( e.weight < A && ! uf.same(e.from, e.to) ) {
-          res.push_back(e);
-          uf.merge(e.from, e.to);
-        }
-      }
-      
-      return res;
-    }
-    
     const Graph generate_graph( const Int& num_vertices, const EdgeVertices& X, const EdgeVertices& Y, const EdgeCosts& C, const Int& num_edges, const Int& A ) {
       Graph G;
       G.init(num_vertices);
@@ -380,9 +387,4 @@ int main() {
   return solution::Solution().run();
 }
 #endif
-
-
-
-
-
 
