@@ -1,0 +1,6 @@
+digraph test {
+1 -> 2 [label="10"];
+4 -> 3 [label="12"];
+4 -> 1 [label="41"];
+2 -> 3 [label="23"];
+}

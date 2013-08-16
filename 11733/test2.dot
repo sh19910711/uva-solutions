@@ -1,0 +1,5 @@
+digraph test2 {
+    1 -> 2 [label="20"];
+    4 -> 5 [label="40"];
+    3 -> 2 [label="30"];
+}
