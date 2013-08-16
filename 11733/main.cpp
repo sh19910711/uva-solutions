@@ -53,6 +53,7 @@ namespace solution {
   };
 }
 
+// @snippet<sh19910711/contest:misc/smart_pointer_reference_count.cpp>
 namespace misc {
   class SmartPointerReferenceCount {
   public:
@@ -63,6 +64,7 @@ namespace misc {
   };
 }
 
+// @snippet<sh19910711/contest:misc/smart_pointer.cpp>
 namespace misc {
   template <typename Type> class SmartPointer {
   public:
@@ -104,6 +106,7 @@ namespace misc {
   };
 }
 
+// @snippet<sh19910711/contest:graph/interface.cpp>
 namespace graph {
   template <typename WeightType, typename EdgeType> class GraphInterface {
   public:
@@ -116,26 +119,26 @@ namespace graph {
   };
 }
 
+// @snippet<sh19910711/contest:graph/adjacent_list.cpp>
 namespace graph {
   template <typename WeightType, typename EdgeType> class AdjacentList: public GraphInterface<WeightType, EdgeType> {
   public:
     typedef misc::SmartPointer<EdgeType> EdgePointer;
     typedef std::vector<EdgePointer> Edges;
     typedef std::vector<Edges> VertexEdges;
-
+    
     void init( const int& num_vertices ) {
       this->num_vertices = num_vertices;
       this->vertex_edges = VertexEdges(this->num_vertices);
     }
-
+    
     void add_edge( EdgePointer edge ) {
       this->vertex_edges[edge->from].push_back(edge);
     }
-
+    
     int num_vertices;
     VertexEdges vertex_edges;
-
-  private:
+    
   };
 }
 
@@ -221,7 +224,7 @@ namespace solution {
   using namespace std;
   typedef graph::AdjacentList<Int, Edge> Graph;
   typedef setlib::DisjointSets UnionFind;
-
+  
   struct Result {
     Int cost;
     Int airports;
@@ -271,7 +274,7 @@ namespace solution {
       minimum_cost = ret.cost;
       minimum_airports = ret.airports;
     }
-
+    
     Result calc_result( const Int& num_vertices, const Edges& edges, const Int& A ) {
       Int cost = 0;
       Int airports = 0;
@@ -290,21 +293,21 @@ namespace solution {
       }
       return Result(cost + airports * A, airports);
     }
-
+    
     const Edges get_minimum_spanning_forest( const Graph& G ) {
       typedef std::priority_queue<Edge, Edges, std::greater<Edge> > PriorityQueue;
       PriorityQueue E;
-
+      
       for ( int i = 0; i < G.num_vertices; ++ i ) {
         for ( Graph::Edges::const_iterator it_i = G.vertex_edges[i].begin(); it_i != G.vertex_edges[i].end(); ++ it_i ) {
           const Edge& e = **it_i;
           E.push(Edge(e.from, e.to, e.weight));
         }
       }
-
+      
       Edges res;
       UnionFind uf(G.num_vertices);
-
+      
       while ( ! E.empty() ) {
         Edge e = E.top();
         E.pop();
@@ -313,7 +316,7 @@ namespace solution {
           uf.merge(e.from, e.to);
         }
       }
-
+      
       return res;
     }
     
@@ -377,6 +380,7 @@ int main() {
   return solution::Solution().run();
 }
 #endif
+
 
 
 
