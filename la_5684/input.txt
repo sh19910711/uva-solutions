@@ -1,0 +1,13 @@
+2
+5
+Doc n y
+sneezy n n no yes
+princecharming no n no no n
+goofy yes
+grumpy n y
+5
+evilemperor n y
+princesslia
+r2d2 no no y
+obeyonecanopy n no y
+darthvedar y
