@@ -129,6 +129,11 @@ namespace storage {
     VectorClass() { data = Pointer(new ValueType[SIZE]); }
     ValueType& operator [] ( const int& index ) { return *(data + index); }
     const ValueType& operator [] ( const int& index ) const { return *(data + index); }
+
+    void fill( ValueType v ) {
+      std::fill(data + 0, data + SIZE, v);
+    }
+
   private:
     Pointer data;
   };
@@ -218,7 +223,7 @@ namespace solution {
   protected:
     static Int match( const ConnectedNodes& cons, const ConnectedNodesNums& cons_nums, Edges& edges, Used& used ) {
       Int res = 0;
-      for ( int i = 0; i < MAX_NODES; ++ i ) {
+      for ( int i = 0; i < SIZE; ++ i ) {
         init_dfs(used);
         if ( dfs(0, cons, cons_nums, edges, used) ) {
           res ++;
@@ -246,15 +251,14 @@ namespace solution {
     }
 
     static void init_dfs( Used& used ) {
-      for ( int i = 0; i < MAX_NODES; ++ i )
-        used[i] = false;
+      used.fill(false);
     }
 
     static Edges init_edges() {
       Edges res;
-      for ( int i = 0; i < MAX_NODES; ++ i )
-        for ( int j = 0; j < MAX_NODES; ++ j )
-          res[i][j] = false;
+      for ( int i = 0; i < MAX_NODES; ++ i ) {
+        res[i].fill(false);
+      }
       return res;
     }
 
@@ -281,7 +285,14 @@ namespace solution {
       cons[b][cons_nums[b] ++] = a;
     }
 
+    static ConnectedNodesNums init_cons() {
+      ConnectedNodesNums res;
+      res.fill(0);
+      return res;
+    }
+
     static void generate_graph( const Int& N, const Grid& grid, ConnectedNodes& cons, ConnectedNodesNums& cons_nums, Edges& edges ) {
+      cons_nums = init_cons();
       for ( int i = 0; i < N; ++ i ) {
         for ( int j = 0; j < N; ++ j ) {
           if ( grid[i][j] == CELL_WHITE ) {
