@@ -263,27 +263,14 @@ namespace solution {
       Int tmp_node_id = 0;
       Int tmp_index = 0;
       NodePointer tree = generate_tree(s.E, tmp_index, tmp_node_id);
-      // print_tree(tree, 0);
       
       s.dp = init_tree_dp();
       do_tree_dp(s.L, tree, s.S, s.dp);
-      // print_dp(1, s.L, MAX_TYPES, s.dp);
 
       s.result = get_minimum_cost(s.L, s.dp);
     }
 
   protected:
-    static void print_dp( const Int& N, const Int& L, const Int& T, const Table& dp ) {
-      for ( int i = 0; i < N; ++ i ) {
-        cout << "node = " << i << ": " << N << endl;
-        for ( int j = 0; j < L; ++ j ) {
-          for ( int k = 0; k < T; ++ k ) {
-            cout << i << ", " << j << ", " << TYPE_LETTERS[k] << " = " << dp[i][j][k] << endl;
-          }
-        }
-      }
-    }
-
     static Int get_minimum_cost( const Int& n, const Table& dp ) {
       Int res = 0;
       for ( int i = 0; i < n; ++ i ) {
