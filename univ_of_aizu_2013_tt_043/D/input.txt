@@ -1,0 +1,12 @@
+2 
+2 3 
+AGG 
+CGT 
+(0,1) 
+5 5 
+ACGTG 
+ACATG 
+CTATG 
+ATATG 
+GTATT 
+((0,1),(2,(3,4)))
