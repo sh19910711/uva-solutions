@@ -20,23 +20,29 @@
 #include <cstring>
 #include <cmath>
 
+// @snippet<sh19910711/contest:solution/define_classes.cpp>
+namespace solution {
+  class Solution;
+  class Solver;
+  class Storages;
+}
+
 // @snippet<sh19910711/contest:solution/interface.cpp>
 namespace solution {
   class SolutionInterface {
   public:
+    virtual ~SolutionInterface() {};
     virtual int run() = 0;
     
   protected:
+    SolutionInterface() {}
     virtual void pre_calc() {}
     virtual bool action() = 0;
     virtual void init() {};
-    virtual bool input() { return false; };
-    virtual void output() const {};
-    
-    SolutionInterface() {}
-    
-  private:
-    
+    virtual bool input( Storages& s ) { return false; };
+    virtual void output( const Storages& s ) const {};
+    virtual void before_action( const int& test_no ) const {}
+    virtual void after_action( const int& test_no ) const {}
   };
 }
 
@@ -44,33 +50,23 @@ namespace solution {
 namespace solution {
   class SolutionBase: public SolutionInterface {
   public:
+    virtual ~SolutionBase() {}
     virtual int run() {
-      pre_calc();
-      while ( action() );
+      this->pre_calc();
+      for (;;) {
+        this->before_action(-1);
+        if ( ! this->action() ) { this->after_action(-1); break; }
+        this->after_action(-1);
+      };
       return 0;
     }
-    
+  protected:
+    SolutionBase() {}
   };
 }
 
-// @snippet<sh19910711/contest:storage/vector.cpp>
-namespace storage {
-  template <typename ValueType, int SIZE> class Vector {
-  public:
-    typedef ValueType Type;
-    Type& operator [] ( const int& index ) { return data[index]; }
-    const Type& operator [] ( const int& index ) const { return data[index]; }
-  private:
-    Type data[SIZE];
-  };
-}
-
-// @snippet<sh19910711/contest:storage/vector_types.cpp>
-namespace storage {
-}
-
-// @snippet<sh19910711/contest:solution/typedef.cpp>
 namespace solution {
+  using namespace std;
   typedef std::istringstream ISS;
   typedef std::ostringstream OSS;
   typedef long long Int;
@@ -79,89 +75,93 @@ namespace solution {
   
 }
 
-// @snippet<sh19910711/contest:solution/namespace-area.cpp>
 namespace solution {
-  // namespaces, types
-  using namespace std;
-}
-
-// @snippet<sh19910711/contest:solution/consts-area.cpp>
-namespace solution {
-  // constant vars
-  
 }
 
 // @snippet<sh19910711/contest:solution/storages-area.cpp>
 namespace solution {
   // storages
-  Int P;
-  Int Q;
+  struct InputStorage {
+    Int x;
+    Int y;
+  };
 
-  Int result;
+  struct OutputStorage {
+    Int result;
+  };
+
+  struct DataStorage {
+  };
+
+  class Storages {
+  public:
+    InputStorage  in;
+    OutputStorage out;
+    DataStorage   data;
+  };
+  
+  Storages global_storages;
 }
 
 // @snippet<sh19910711/contest:solution/solver-area.cpp>
 namespace solution {
   class Solver {
   public:
-    void solve() {
-      result = calc_s(P, Q);
+    const OutputStorage& solve( const InputStorage& in, OutputStorage& out, DataStorage& data ) {
+      out.result = g(in.y) - g(in.x - 1);
+      return out;
     }
 
-    const Int calc_s( const Int& p, const Int& q ) const {
-      return calc_g(q) - calc_g(p - 1);
-    }
-
-    const Int calc_g( const Int& x ) const {
+  protected:
+    static Int g( Int x ) {
       if ( x <= 0 )
         return 0;
-      Int t = x % 10;
-      Int s = x / 10;
-      return 45 * s + t * ( t + 1 ) / 2 + calc_g(s);
+      return s(9) * ( x / 10 ) + s(x % 10) + g(x / 10);
     }
-    
-  private:
+
+    static Int s( Int x ) {
+      return x * ( x + 1 ) / 2;
+    }
     
   };
 }
 
-// @snippet<sh19910711/contest:solution/solution.cpp>
 namespace solution {
   class Solution: public SolutionBase {
   public:
+    Solution() {}
+    Solution(Storages* p): storages(p) {}
+    
   protected:
     virtual bool action() {
-      init();
-      if ( ! input() )
+      this->init();
+      if ( ! this->input(this->storages->in) )
         return false;
-      solver.solve();
-      output();
+      this->output(solver.solve(this->storages->in, this->storages->out, this->storages->data));
       return true;
     }
 
-    bool input() {
-      if ( ! ( std::cin >> P >> Q ) )
+    bool input( InputStorage& in ) {
+      if ( ! ( std::cin >> in.x >> in.y ) )
         return false;
-      if ( P < 0 && Q < 0 )
-        return false;
-      return true;
+      return ! ( in.x < 0 && in.y < 0 );
     }
 
-    void output() const {
-      std::cout << result << std::endl;
-    } 
-    
-    Solver solver;
+    void output( const OutputStorage& out ) {
+      std::cout << out.result << endl;
+    }
     
   private:
-    
+    Solver solver;
+    Storages* storages;
   };
 }
 
 // @snippet<sh19910711/contest:main.cpp>
 #ifndef __MY_UNIT_TEST__
 int main() {
-  return solution::Solution().run();
+  std::cin.sync_with_stdio(false);
+  return solution::Solution(&solution::global_storages).run();
 }
 #endif
 
