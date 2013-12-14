@@ -1,0 +1,12 @@
+1
+5 6
+AB
+AC
+BC
+CD
+CE
+ED
+3
+ABCD
+ACD
+CD
