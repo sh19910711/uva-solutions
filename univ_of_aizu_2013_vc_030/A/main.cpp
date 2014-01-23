@@ -155,7 +155,7 @@ namespace solution {
       return std::cin >> in->N;
     }
     void before_action( const int& test_id ) {
-      std::cout << "Case #" << test_id << ": ";
+      std::cout << "Case #" << test_id + 1 << ": ";
     }
     void output( const OutputStorage* out ) {
       std::cout << out->N << " is ";
