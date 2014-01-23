@@ -75,6 +75,7 @@ namespace solution {
       this->after_all_actions();
       return 0;
     }
+
   private:
     int get_tests() {
       std::string line;
@@ -130,6 +131,7 @@ namespace solution {
       do_shuffles(in->shuffle, in->A, out->cards);
       return out;
     }
+
   protected:
     static void do_shuffles( const Int shuffle[SHUFFLES][CARDS], const Vector& queries, Int cards[CARDS] ) {
       Int result[2][CARDS];
@@ -177,6 +179,7 @@ namespace solution {
       }
       std::reverse(all_numbers.begin(), all_numbers.end());
     }
+
     bool input( InputStorage* in ) {
       input_shuffles(in->shuffles);
       for ( int i = 0; i < in->shuffles; ++ i ) {
@@ -185,11 +188,13 @@ namespace solution {
       input_queries(in->A);
       return true;
     }
+
     void output( const OutputStorage* out ) {
       for ( int i = 0; i < CARDS; ++ i ) {
         output_card(out->cards[i]);
       }
     }
+
   private:
     void output_card( const Int& card_id ) {
       const string values[13] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
@@ -208,6 +213,7 @@ namespace solution {
       std::reverse(queries.begin(), queries.end());
       return true;
     }
+
     bool input_shuffle( Int shuffle[CARDS] ) {
       for ( int i = 0; i < CARDS; ++ i ) {
         shuffle[i] = all_numbers.back() - 1;
@@ -215,6 +221,7 @@ namespace solution {
       }
       return true;
     }
+
     bool input_shuffles( Int& shuffles ) {
       shuffles = all_numbers.back();
       all_numbers.pop_back();
