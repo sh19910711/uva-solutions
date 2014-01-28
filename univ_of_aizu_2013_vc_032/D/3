@@ -1,0 +1,215 @@
+
+// @snippet<sh19910711/contest-base:headers.cpp>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <iomanip>
+#include <vector>
+#include <set>
+#include <map>
+#include <stack>
+#include <queue>
+#include <algorithm>
+#include <numeric>
+#include <limits>
+#include <complex>
+#include <functional>
+#include <iterator>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+
+// @snippet<sh19910711/contest-base:solution/define-classes.cpp>
+namespace solution {
+  struct InputStorage;
+  struct OutputStorage;
+  struct Storages {
+    InputStorage* in;
+    OutputStorage* out;
+  };
+}
+
+// @snippet<sh19910711/contest-base:solution/solver-interface.cpp>
+namespace solution {
+  struct SolverInterface {
+    virtual ~SolverInterface() {}
+    virtual const OutputStorage* solve( const InputStorage* in, OutputStorage* out ) = 0;
+  };
+}
+
+// @snippet<sh19910711/contest-base:solution/solution-interface.cpp>
+namespace solution {
+  struct SolutionInterface {
+    virtual ~SolutionInterface() {};
+    SolverInterface* solver;
+    Storages* storages;
+    virtual int run() = 0;
+    virtual bool input( InputStorage* s ) = 0;
+    virtual void output( const OutputStorage* s ) = 0; 
+    virtual void before_all_actions() {}
+    virtual void after_all_actions() {}
+    virtual void before_action( const int& test_no ) {}
+    virtual void after_action( const int& test_no ) {}
+    virtual bool action() {
+      if ( ! this->input(this->storages->in) ) {
+        return false;
+      }
+      this->output(solver->solve(this->storages->in, this->storages->out));
+      return true;
+    }
+  };
+}
+
+// @snippet<sh19910711/contest-base:solution/solution-base.cpp>
+namespace solution {
+  struct SolutionBase: SolutionInterface {
+    virtual ~SolutionBase() {};
+    virtual int run() {
+      this->before_all_actions();
+      for (;;) {
+        this->before_action(-1);
+        if ( ! this->action() ) { this->after_action(-1); break; }
+        this->after_action(-1);
+      };
+      this->after_all_actions();
+      return 0;
+    }
+  };
+}
+
+// @snippet<sh19910711/contest-base:solution/typedef.cpp>
+namespace solution {
+  using namespace std;
+  typedef long long Int;
+  typedef long double Double;
+}
+
+// @snippet<sh19910711/contest-base:solution/constants.cpp>
+namespace solution {
+  // constants
+  const Int SIZE = 100 + 11;
+  const string YES = "STABLE";
+  const string NO = "UNSTABLE";
+  const char EMPTY_CELL = '.';
+  const Int NONE = -1;
+}
+
+// @snippet<sh19910711/contest-base:solution/namespace-area.cpp>
+namespace solution {
+  // namespaces, types
+  
+}
+
+// @snippet<sh19910711/contest-base:solution/storages-area.cpp>
+namespace solution {
+  struct InputStorage {
+    Int W;
+    Int H;
+    string grid[SIZE];
+  };
+  struct OutputStorage {
+    bool result;
+  };
+}
+
+// @snippet<sh19910711/contest-base:solution/solver-area.cpp>
+namespace solution {
+  typedef std::tuple <Int, Int> Pos;
+
+  struct Piece;
+  typedef std::vector <Piece> Pieces;
+  struct Piece {
+    Double x_l;
+    Double x_r;
+    Double m_sum;
+    Pieces childrens;
+  };
+
+  struct Search {
+    const InputStorage* in;
+
+    Int W;
+    Int H;
+    string G[SIZE];
+
+    Int sr;
+    Int sc;
+    bool visited[SIZE][SIZE];
+
+    void run() {
+      this->W = in->W;
+      this->H = in->H;
+      std::copy(in->grid, in->grid + SIZE, G);
+      find_start();
+
+      std::fill((bool*)visited, (bool*)visited + SIZE * SIZE, false);
+      find_pieces(sr, sc);
+    }
+
+    void find_pieces( const Int& sr, const Int& sc ) {
+      find_blocks(G[sr][sc], sr, sc);
+    }
+
+    void find_start() {
+      auto ret = find_cell([this](Int r, Int c){ return r == H - 1 && G[r][c] != EMPTY_CELL; });
+      sr = get<0>(ret);
+      sc = get<1>(ret);
+    }
+
+    template <class Func> Pos find_cell( Func f ) {
+      for ( auto i = 0; i < H; ++ i )
+        for ( auto j = 0; j < W; ++ j )
+          if ( f(i, j) )
+            return Pos(i, j);
+      return Pos(NONE, NONE);
+    }
+  };
+
+  struct Solver: SolverInterface {
+    Search search;
+
+    const OutputStorage* solve( const InputStorage* in, OutputStorage* out ) {
+      search.in = in;
+      search.run();
+      return out;
+    }
+  };
+}
+
+// @snippet<sh19910711/contest-base:solution/solution.cpp>
+namespace solution {
+  struct Solution: SolutionBase {
+    bool input( InputStorage* in ) {
+      if ( ! ( std::cin >> in->W >> in->H ) )
+        return false;
+      if ( in->W == 0 && in->H == 0 )
+        return false;
+      for ( int i = 0; i < in->H; ++ i )
+        std::cin >> in->grid[i];
+      return true;
+    }
+    void output( const OutputStorage* out ) {
+      std::cout << ( out->result ? YES : NO ) << std::endl;
+    }
+  };
+}
+
+// @snippet<sh19910711/contest-base:main.cpp>
+#ifndef __MY_UNIT_TEST__
+int main() {
+  using namespace solution;
+  std::cin.sync_with_stdio(false);
+  static InputStorage in;
+  static OutputStorage out;
+  static Storages storages;
+  static Solution solution;
+  static Solver solver;
+  storages.in = &in;
+  storages.out = &out;
+  solution.storages = &storages;
+  solution.solver = &solver;
+  return solution.run();
+}
+#endif
+
