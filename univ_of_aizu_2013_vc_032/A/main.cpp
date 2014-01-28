@@ -205,7 +205,9 @@ namespace solution {
     }
     void output( const OutputStorage* out ) {
       for ( int i = 0; i < out->friends; ++ i ) {
-        std::cout << out->F[i] << " " << out->NB[i] << " ";
+        std::cout << out->F[i] << " " << out->NB[i];
+        if ( out->NB[i] > 0 )
+          std::cout << " ";
         for ( int j = 0; j < out->NB[i]; ++ j ) {
           std::cout << out->B[i][j];
           if ( j + 1 < out->NB[i] ) 
