@@ -171,6 +171,9 @@ namespace solution {
     }
   };
 
+  const Int dr[4] = {1, -1, 0, 0};
+  const Int dc[4] = {0, 0, 1, -1};
+
   struct Search {
     const InputStorage* in;
 
@@ -182,9 +185,6 @@ namespace solution {
     Int sc;
     bool visited[SIZE][SIZE];
     bool visited_childrens[SIZE][SIZE];
-
-    const Int dr[4] = {1, -1, 0, 0};
-    const Int dc[4] = {0, 0, 1, -1};
 
     bool run() {
       this->W = in->W;
