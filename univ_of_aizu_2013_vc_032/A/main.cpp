@@ -211,11 +211,11 @@ namespace solution {
           if ( j + 1 < out->NB[i] ) 
             std::cout << " ";
         }
-        std::cout << std::endl;
+        std::cout << "\n";
       }
     }
     void before_action( const int& tid ) {
-      std::cout << "Case #" << tid + 1 << ":" << endl;
+      std::cout << "Case #" << tid + 1 << ":" << "\n";
     }
   };
 }
