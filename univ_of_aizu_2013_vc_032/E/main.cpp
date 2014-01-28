@@ -202,6 +202,8 @@ namespace solution {
     Int get_sum( const Int& l, const Int& r ) {
       Int mi = std::min(l, r);
       Int ma = std::max(l, r);
+      if ( mi < 0 )
+        return sum_p[ma];
       return sum_p[ma] - sum_p[mi - 1];
     }
 
