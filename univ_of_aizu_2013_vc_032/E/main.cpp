@@ -130,6 +130,7 @@ namespace solution {
     Int sum_p[MAX_N];
 
     Int run() {
+      std::fill(begin(sum_p), end(sum_p), 0LL);
       N = 0;
       init_points();
       init_sum_p();
