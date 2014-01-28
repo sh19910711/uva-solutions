@@ -102,7 +102,7 @@ namespace solution {
 namespace solution {
   // namespaces, types
   const Int FRIENDS = 3;
-  const Int SIZE = 1000 + 11;
+  const Int SIZE = 10000 + 11;
   const Int MAX_PROBLEM_ID = 10000 + 11;
 }
 
